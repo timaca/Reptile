@@ -6,19 +6,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import tk.timaca.Reptile.Bean.ALable;
+import tk.timaca.Reptile.Bean.SinaArti;
 
 public class NetUnit {
+	
 	private static NetUnit instance=null;
 	
 	private NetUnit(){}
+	
 	
 	public static NetUnit getNetUnit(){//单例模式
 		synchronized (NetUnit.class) {
@@ -28,7 +38,8 @@ public class NetUnit {
 		}
 		return instance;
 	}
-	
+	/*
+	public NetUnit(){}*/
 	public String getUrlCotent(URL url) throws IOException{//传入url对象，返回网页内容
 		String str="";//定义网页内容字符串
 		InputStream inputStream=(InputStream)url.getContent();//定义输入流指向url.getcontent()
@@ -193,64 +204,98 @@ public class NetUnit {
 		
 	}
 	
-	public static void main(String[] args) throws MalformedURLException{
-		
-		String str="<link rel='icon' sizes='any' mask href='//www.sina.com.cn/favicon.svg'>"+
-					"<meta name='theme-color' content='red'>"+
-					"<link rel='icon' type='image/x-icon' href='//www.sina.com.cn/favicon.ico' /> "+
-					
-						"<meta name='viewport' content='width=1024' />"+
-						"<meta name='publishid' content='2,823,1'>"+
-						"<meta name='stencil' content='PGLS000027'>"+
-						"<meta name='verify-v1' content='6HtwmypggdgP1NLw7NOuQBI2TW8+CfkYCoyeB8IDbn8=' />"+
-						"<meta content='width=1024,maximum-scale=2.0' name='viewport'/>"+
-						"<link rel='stylesheet' href='//n3.sinaimg.cn/tech/https_index/feed_tech.min.css' type='text/css' />"+
-						"<!-- 顶通 css -->"+
-						"<link rel='stylesheet' type='text/css' href='//n3.sinaimg.cn/tech/https_index/top.css'>"+
-						"<!-- 登录 css -->"+
-						"<link rel='stylesheet' type='text/css' href='//i.sso.sina.com.cn/css/userpanel/v1/top_account_v2.css'>"+
-						"<!-- 登录皮肤css -->"+
-						"<link rel='stylesheet' type='text/css' href='//n2.sinaimg.cn/tech/https_index/comment.css'>"+
-						"<link rel='stylesheet' href='//n2.sinaimg.cn/common/channelnav/css/common_nav.css' type='text/css'>"+
-						"<!-- <link rel='stylesheet' href='//n2.sinaimg.cn/tech/index16/01/tech_index.css?ver=1482050345' type='text/css' /> -->"+
-						"<link rel='stylesheet' href='//n2.sinaimg.cn/tech/https_index/tech_index.css' type='text/css' />";
-		
-		//NetUnit netUnit=new NetUnit();
+	/**
+	 * 根据关键字筛选src
+	 * @param Date
+	 * @return
+	 */
+	public List<ALable> ScreenSrc(List<ALable> ALables,String Date){
+		List<ALable> ALableList=new ArrayList<ALable>();
+		//System.out.println("ScreenSrc size:"+ALables.size()+"ScreenSrc Date:"+Date);
+		for (ALable aLable : ALables) {
+			if(aLable.getHref()!=null){//先判断href是否为空
+				if(aLable.getHref().contains(Date)){
+					ALableList.add(aLable);
+				}
+			}
+		}
+		return ALableList;
+	}
+	
+	/**
+	 * 获取系统日期
+	 * @return
+	 */
+	public String DateToString(){
+		Date day=new Date();
+		SimpleDateFormat dateFormat=new SimpleDateFormat("YYYY-MM-dd");//设置日期格式
+		String date=dateFormat.format(day);//获取系统时间
+		System.out.println(date);
+		return date;
+	}
+	
+	
+	/**
+	 * 使用jsoup第三方jar包解析html
+	 * artibodyTitle main_title正文标题  	artibody正文内容
+	 * 根据url获取内容并返回SinaArti对象
+	 * @param url
+	 * @return
+	 */
+	public SinaArti HtmlToObject(URL url){
+		SinaArti sinaArti = null;
 		NetUnit netUnit=NetUnit.getNetUnit();
+		String html=netUnit.getUrlHtml(url);
+		Document document=Jsoup.parse(html);
+		Element artibody=document.getElementById("artibody");
+		//netUnit.ParseObject(artibody);
+		//Element artibodyTitle=document.getElementById("artibodyTitle");
+		Element artibodyTitle=document.getElementById("main_title");
+		//Element pub_date=document.getElementById("pub_date");
+		Element pub_date=document.select(".titer").first();
+		Elements art_keywords=document.select(".art_keywords a");
+		for (Element art_keyword : art_keywords) {
+			System.out.println("art_keywords:"+art_keyword.text());
+		}
+		Elements pngs = artibody.select("img[src$=.png]");//扩展名为.png的图片
+		for (Element png : pngs) {
+			System.out.println("pngs:"+png.attr("src"));
+		}
+		System.out.println("HtmlToObject pub_date:"+pub_date.text()+"artibodyTitle:"+artibodyTitle.text());
+		System.out.println("context:"+artibody.html());
+		return sinaArti;
+	}
+	
+	
+	public void ParseObject(Object obj){
+		Class o=obj.getClass();
+		System.out.println("ParseObject name:"+o.getName());
+		Field[] fields=o.getFields();
+		for (Field field : fields) {
+			System.out.println(field.getName());
+		}
+	}
+	
+	public static void main(String[] args) throws MalformedURLException{
+		NetUnit netUnit=NetUnit.getNetUnit();
+		//NetUnit netUnit=new NetUnit();
+		/*
 		List<ALable> ALableList=new ArrayList<ALable>();
 		URL url;
 		try {
 			url = new URL("http://tech.sina.com.cn//");
 			//url = new URL("http://www.baidu.com//");
-			//str=netUnit.getUrlCotent(url);
-			//netUnit.toSaveFile(url, "sina.html");
-			//str=netUnit.getUrlHtml(url);
-			//System.out.println(str);
 			ALableList=netUnit.CaptureLink(url);
-			
-			
+			System.out.println("MAIN SIZE:"+ALableList.size());
+			List<ALable> AfterALableList=netUnit.ScreenSrc(ALableList, netUnit.DateToString());
+			for (ALable aLable : AfterALableList) {
+				System.out.println("main href:"+aLable.getHref()+" main title:"+aLable.getTitle());
+			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int index=(int)(Math.random()*408);
-		ALable aLable=ALableList.get(index);
-		String SonUrl=aLable.getHref();
-		String SonHtml=netUnit.getUrlHtml(new URL(SonUrl));
-		System.out.println(SonHtml);
-		//str="href='//n2.sinaimg.cn/common/channelnav/css/common_nav.css'";
-		//str="Chapter 3";
-		/*
-		 * 
-		
-		//<a\shref=\"(https?://[^"]+)\"[^>]*>([^<]+)<\/a>
-		String string="null";
-		Pattern pattern=Pattern.compile("<a.*?/a>");
-		Matcher matcher=pattern.matcher(str);
-		System.out.println(matcher.find());
-		string=matcher.group();
-		System.out.println("到底匹配到什么了:"+string);
 		*/
-		
+		String src="http://tech.sina.com.cn/d/v/2017-01-11/doc-ifxzkfuh6849281.shtml";
+		netUnit.HtmlToObject(new URL(src));
 	}
 }
