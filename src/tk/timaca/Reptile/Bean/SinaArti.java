@@ -12,6 +12,8 @@ public class SinaArti {
 	private String uniquekey;//唯一标识
 	private String type;//类型一
 	private String realtype;//类型二
+        private String content;//文章内容
+        private String tag;//文章标签
 	
 	public SinaArti(){}
 	
@@ -74,6 +76,28 @@ public class SinaArti {
 	}
 	public void setRealtype(String realtype) {
 		this.realtype = realtype;
+	}
+        public String getContent(){
+                return content;
+        }
+        public void setContent(String content){
+                this.content=content;
+        }
+        public String getTag(){
+            return tag;
+        }
+        public void setTag(String tag){
+            this.tag=tag;
+        }
+    
+        
+
+	@Override
+	public String toString() {
+		return "SinaArti [title=" + title + ", date=" + date + ", author_name=" + author_name + ", thumbnail_pic_s="
+				+ thumbnail_pic_s + ", thumbnail_pic_s02=" + thumbnail_pic_s02 + ", thumbnail_pic_s03="
+				+ thumbnail_pic_s03 + ", url=" + url + ", uniquekey=" + uniquekey + ", type=" + type + ", realtype="
+				+ realtype +", content=" + content+ ", tag=" + tag+ "]";
 	}
 	
 	

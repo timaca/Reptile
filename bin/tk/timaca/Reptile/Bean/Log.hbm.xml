@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2017-1-14 17:04:49 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="tk.timaca.Reptile.Bean.Log" table="LOG">
+        <id name="logid" type="int">
+            <column name="LOGID" />
+            <generator class="identity" /><!-- 主键递增 -->
+        </id>
+        <many-to-one name="user" cascade="save-update" class="tk.timaca.Reptile.Bean.User" fetch="join">
+            <column name="USER" />
+        </many-to-one>
+        <property name="date" type="java.util.Date">
+            <column name="DATE" />
+        </property>
+        <property name="type" type="java.lang.String">
+            <column name="TYPE" />
+        </property>
+        <property name="num" type="int">
+            <column name="NUM" />
+        </property>
+        <property name="result" type="java.lang.String">
+            <column name="RESULT" />
+        </property>
+    </class>
+</hibernate-mapping>
